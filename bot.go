@@ -13,12 +13,14 @@ type SlackClient interface {
 	PrintTeamInfo()
 	// user id -> image url
 	GetUsersAvatars() map[string]string
-	NotifyUser(id string)
+	NotifyUser(id string, msg string)
+	CheckChannelMembersAvatars(channel string, processProfileFn func(user *slack.User))
 }
 
 func NewSlack(slackToken string) SlackClient {
 	api := slack.New(slackToken)
-	api.SetDebug(true)
+	//	api.SetDebug(true)
+	//	api.GetChannels(true)
 	return &slackClient{
 		api: api,
 	}
@@ -48,9 +50,25 @@ func (sc *slackClient) GetUsersAvatars() map[string]string {
 	}
 }
 
-func (sc *slackClient) NotifyUser(id string) {
+func (sc *slackClient) CheckChannelMembersAvatars(channel string, processProfileFn func(user *slack.User)) {
+	// todo: use pagination instead!
+	if channel, err := sc.api.GetChannelInfo(channel); err != nil {
+		panic(err)
+	} else {
+		for i, mId := range channel.Members {
+			log.Println(i, mId)
+			if user, err := sc.api.GetUserInfo(mId); err != nil {
+				panic(err)
+			} else {
+				processProfileFn(user)
+			}
+		}
+	}
+}
+
+func (sc *slackClient) NotifyUser(id string, msg string) {
 	params := slack.PostMessageParameters{}
-	if _, _, err := sc.api.PostMessage(id, "Hi :) Please do not forget to set proper avatar picture!", params); err != nil {
+	if _, _, err := sc.api.PostMessage(id, msg, params); err != nil {
 		log.Printf("Fail to notify user %s: %+v", id, err)
 	}
 }

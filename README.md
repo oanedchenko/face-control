@@ -9,17 +9,21 @@ Commandline util which is slack bot. When it runs it checks slack workspace user
 
 ### Installation
 * Install the OpenCV Developer package. On Ubuntu systems that's `sudo apt install libopencv-dev`
-* `go get github.com/oanedchenko/face-control`
+* `go get github.com/lazywei/go-opencv`
 * `go get github.com/nlopes/slack`
+* `go get github.com/oanedchenko/face-control`
 * `cd $GOPATH/src/github.com/oanedchenko/face-control && go build`
 
 ### Usage
 ~~`./face-control < path/to/image.jpg`~~
-`SLACK_TOKEN=your-slack-app-token ./face-control`
+
+`CHANNEL_ID=xxx SLACK_TOKEN=your-slack-app-token ./face-control`
 
 ~The output will be like that:~
+
 ~`Face 0 detected: (199,235)-(648,684)`~
 
 ## Plans
 ~I'm going to create a slack bot to check if people use their real picture as an avatar image and to annoy them with remainders to do so.~
+
 To run it in docker container as a demon, to make it work by schedule.

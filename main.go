@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/nlopes/slack"
 	"image"
 	_ "image/jpeg"
 	_ "image/png"
@@ -11,20 +12,22 @@ import (
 )
 
 func main() {
+
 	finder := NewFinder()
 	sc := NewSlack(os.Getenv("SLACK_TOKEN"))
 	//sc.PrintTeamInfo()
-	for id, url := range sc.GetUsersAvatars() {
-		log.Printf("User %s has avatr image url %s", id, url)
-		img := loadImageFromUrl(url)
+	// #garage-go channel:
+	sc.CheckChannelMembersAvatars(os.Getenv("CHANNEL_ID"), func(user *slack.User) {
+		log.Printf("Processing user %s(%s %s)", user.ID, user.Name, user.RealName)
+		img := loadImageFromUrl(user.Profile.Image192)
 		faces := finder.Detect(img)
 		if lf := len(faces); lf == 1 {
-			log.Printf("User %s has good avatar", id)
+			log.Printf("User %s has good avatar", user.Name)
 		} else {
-			log.Printf("User %s: expected 1 face on avatar image, got %d", id, lf)
-			sc.NotifyUser(id)
+			log.Printf("User %s: expected 1 face on avatar image, got %d", user.Name, lf)
+			sc.NotifyUser(user.ID, fmt.Sprintf("Hi %s :) Please do not forget to set proper avatar picture!", user.Name))
 		}
-	}
+	})
 }
 
 func imageRecognitionTest() {
